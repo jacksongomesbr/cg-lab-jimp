@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Laboratório JIMP</title>
+    <script src="https://cdn.rawgit.com/oliver-moran/jimp/v0.2.27/browser/lib/jimp.min.js"></script>
+    <script type="text/javascript">
+      Jimp.read('imagem-download.jpg')
+        .then(function(imagem){
+          imagem.resize(320, 200)
+            .greyscale()
+            .getBase64(Jimp.MIME_JPEG, function(err, src){
+              var img = document.createElement('img');
+              img.setAttribute('src', src);
+              document.body.appendChild(img);
+            });
+        })
+        .catch(function(erro){
+          console.log('Não foi possível processar os dados da imagem.');
+          console.log(erro);
+        });
+    </script>
+  </head>
+  <body>
+
+  </body>
+</html>

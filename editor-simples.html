@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Laboratório JIMP</title>
+    <script src="https://cdn.rawgit.com/oliver-moran/jimp/v0.2.27/browser/lib/jimp.min.js"></script>
+    <script type="text/javascript">
+      var imagem_atual = null;
+      function mostrarImagem(element) {
+        var arquivo = element.files[0];
+        var reader = new FileReader();
+        reader.readAsArrayBuffer(arquivo);
+        reader.addEventListener('load', function(){
+          Jimp.read(this.result)
+            .then(function(imagem){
+              imagem = imagem.resize(320, 200).greyscale();
+              imagem_atual = imagem;
+              exibirImagem(imagem);
+            })
+            .catch(function(erro){
+              console.log('Não foi possível processar os dados da imagem.');
+              console.log(erro);
+            });
+
+        });
+      }
+
+      function exibirImagem(imagem) {
+        imagem.getBase64(Jimp.MIME_JPEG, function(err, src){
+            var img = document.getElementById('display');
+            img.setAttribute('src', src);
+          });
+      }
+
+      function threshold_filter(v, t) {
+        if (v <= t) {
+          return 0;
+        } else {
+          return 255;
+        }
+      }
+
+      function aplicarThreshold(element) {
+        var t = parseInt(element.value);
+        var w = imagem_atual.bitmap.width;
+        var h = imagem_atual.bitmap.height;
+
+        var imagem = imagem_atual.clone();
+
+        for(var i = 0; i < w; i++) {
+          for(var j = 0; j < h; j++) {
+            var cor = imagem.getPixelColor(i, j);
+            var rgba = Jimp.intToRGBA(cor);
+
+            rgba.r = threshold_filter(rgba.r, t);
+            rgba.g = rgba.r;
+            rgba.b = rgba.r;
+
+            var hex = Jimp.rgbaToInt(rgba.r, rgba.g, rgba.b, rgba.a);
+            imagem.setPixelColor(hex, i, j);
+          }
+        }
+
+        exibirImagem(imagem);
+      }
+    </script>
+  </head>
+  <body>
+    <p>Escolha um arquivo de imagem</p>
+    <input type="file" onchange="mostrarImagem(this)">
+    <p>Escolha um valor para o threshold</p>
+    <input type="number" id="valor-threshold" value="50" onchange="aplicarThreshold(this)">
+    <br>
+    <img id="display">
+  </body>
+</html>
